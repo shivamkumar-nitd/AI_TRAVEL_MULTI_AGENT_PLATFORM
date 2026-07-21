@@ -4,6 +4,8 @@ import operator
 
 from click import prompt
 import psycopg
+from psycopg_pool import ConnectionPool
+from psycopg.rows import dict_row
 from langgraph.graph import StateGraph , START , END
 from langgraph.checkpoint.postgres import PostgresSaver
 from langchain_core.messages import SystemMessage , HumanMessage , AIMessage , AnyMessage
@@ -119,8 +121,14 @@ graph.add_edge("hotel_agent","itinerary_agent")
 graph.add_edge("itinerary_agent","final_agent")
 graph.add_edge("final_agent",END)
 
-_conn = psycopg.connect(DATABASE_URL,autocommit=True)
-checkpointer = PostgresSaver(_conn)
+from psycopg_pool import ConnectionPool
+
+pool = ConnectionPool(
+    conninfo=DATABASE_URL,
+    kwargs={"autocommit": True},
+)
+
+checkpointer = PostgresSaver(pool)
 checkpointer.setup()
 
 app = graph.compile(checkpointer=checkpointer)

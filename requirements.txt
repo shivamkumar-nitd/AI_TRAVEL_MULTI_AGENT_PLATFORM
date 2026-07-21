@@ -9,3 +9,4 @@ python-dotenv
 requests
 tavily-python
 click
+psycopg-pool
